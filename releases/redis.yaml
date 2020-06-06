@@ -5,7 +5,7 @@ metadata:
   name: redis
   namespace: demo
   annotations:
-    fluxcd.io/automated: "true"
+    fluxcd.io/automated: "false"
     fluxcd.io/tag.chart-image: semver:~5.0
     fluxcd.io/locked: "true"
     fluxcd.io/locked_msg: "Halt updates for now"
