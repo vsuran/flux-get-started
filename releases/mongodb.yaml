@@ -12,7 +12,7 @@ spec:
   chart:
     repository: https://kubernetes-charts.storage.googleapis.com/
     name: mongodb
-    version: 7.6.3
+    version: 4.0.14
   values:
     image:
       repository: bitnami/mongodb
