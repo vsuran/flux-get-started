@@ -1,0 +1,65 @@
+apiVersion: helm.fluxcd.io/v1
+kind: HelmRelease
+metadata:
+  name: coredns
+  namespace: test-md
+  annotations:
+    flux.weave.works/automated: "false"
+spec:
+  releaseName: coredns
+  chart:
+    git: https://github.com/helm/charts.git
+    ref: master
+    path: stable/coredns 
+  rollback:
+    enable: true
+    force: true
+    disableHooks: false
+    timeout: 360
+    wait: false   
+  values:
+    isClusterService: false
+
+    servers:
+    - zones:
+      - zone: .
+      port: 53
+      plugins:
+      - name: cache
+        parameters: 30
+      - name: file
+        parameters: /etc/coredns/piano.db piano.io
+      - name: debug  
+      - name: errors
+        parameters: stdout
+      - name: loop
+      - name: reload
+      - name: log
+      # Serves a /health endpoint on :8080, required for livenessProbe
+      - name: health
+      # Serves a /ready endpoint on :8181, required for readinessProbe
+      - name: ready
+      # Required to query kubernetes API for data
+      #- name: kubernetes
+      #  parameters: cluster.local
+      # Serves a /metrics endpoint on :9153, required for serviceMonitor
+      - name: prometheus
+        parameters: 0.0.0.0:9153
+      - name: forward
+        parameters: . /etc/resolv.conf
+
+      # you can use rewrite for simple queries  
+      - name: rewrite
+        parameters: name dashx.piano.io prod-dash-elb-956075132.us-east-1.elb.amazonaws.com.  
+
+    #zones are for more complex changes
+    zoneFiles:
+      - filename: piano.db
+        domain: piano.io
+        contents: |
+          piano.io.             IN SOA    emma.ns.cloudflare.com. devops.piano.io. 2032338634 7200 3600 1209600 3600
+          piano.io.             IN NS     emma.ns.cloudflare.com.
+          piano.io.             IN NS     ian.ns.cloudflare.com.
+          local1.piano.io.      IN A      1.2.3.4
+          dash.piano.io.        IN CNAME  prod-dash-elb-956075132.us-east-1.elb.amazonaws.com.
+          local3.piano.io.      IN CNAME  prod-dash-elb-956075132.us-east-1.elb.amazonaws.com.
